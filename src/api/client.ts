@@ -8,12 +8,14 @@ export const setAccessTokenGetter = (fn: () => string | null) => {
 };
 
 export class ApiError extends Error {
-  constructor(
-    public status: number,
-    public errorMessage: string,
-  ) {
+  status: number;
+  errorMessage: string;
+
+  constructor(status: number, errorMessage: string) {
     super(errorMessage);
     this.name = 'ApiError';
+    this.status = status;
+    this.errorMessage = errorMessage;
   }
 }
 

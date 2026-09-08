@@ -15,7 +15,7 @@ let mockTasks: TaskItem[] = Array.from({ length: 12 }, (_, i) => ({
   status: i % 3 === 0 ? 'DONE' : 'TODO',
 }));
 
-function requireAuth(request: Request): HttpResponse | null {
+function requireAuth(request: Request) {
   const auth = request.headers.get('Authorization');
   if (!auth?.startsWith('Bearer ')) {
     return HttpResponse.json({ errorMessage: '인증이 필요합니다.' }, { status: 401 });

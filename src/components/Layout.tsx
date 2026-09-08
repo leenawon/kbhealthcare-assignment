@@ -9,48 +9,52 @@ export function Layout() {
   return (
     <div className={styles.container}>
       <nav className={styles.nav}>
-        <NavLink
-          to="/"
-          end
-          className={({ isActive }) =>
-            `${styles.navItem} ${isActive ? styles.active : ''}`
-          }
-        >
-          <LayoutDashboard size={20} />
-          <span>대시보드</span>
-        </NavLink>
-
-        <NavLink
-          to="/task"
-          className={({ isActive }) =>
-            `${styles.navItem} ${isActive ? styles.active : ''}`
-          }
-        >
-          <CheckSquare size={20} />
-          <span>할 일</span>
-        </NavLink>
-
-        {isAuthenticated ? (
+        <div className={styles.navTop}>
           <NavLink
-            to="/user"
+            to="/"
+            end
             className={({ isActive }) =>
               `${styles.navItem} ${isActive ? styles.active : ''}`
             }
           >
-            <UserCircle size={20} />
-            <span>회원정보</span>
+            <LayoutDashboard size={20} />
+            <span>대시보드</span>
           </NavLink>
-        ) : (
+
           <NavLink
-            to="/sign-in"
+            to="/task"
             className={({ isActive }) =>
               `${styles.navItem} ${isActive ? styles.active : ''}`
             }
           >
-            <LogIn size={20} />
-            <span>로그인</span>
+            <CheckSquare size={20} />
+            <span>할 일</span>
           </NavLink>
-        )}
+        </div>
+
+        <div className={styles.navBottom}>
+          {isAuthenticated ? (
+            <NavLink
+              to="/user"
+              className={({ isActive }) =>
+                `${styles.navItem} ${isActive ? styles.active : ''}`
+              }
+            >
+              <UserCircle size={20} />
+              <span>회원정보</span>
+            </NavLink>
+          ) : (
+            <NavLink
+              to="/sign-in"
+              className={({ isActive }) =>
+                `${styles.navItem} ${isActive ? styles.active : ''}`
+              }
+            >
+              <LogIn size={20} />
+              <span>로그인</span>
+            </NavLink>
+          )}
+        </div>
       </nav>
 
       <main className={styles.main}>

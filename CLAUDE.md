@@ -59,5 +59,5 @@ refactor: 인증 로직 커스텀 훅으로 분리
 
 - feature 브랜치 작업 완료 후 PR 생성
 - PR 제목: 커밋 메시지와 동일한 형식 (`feat: 대시보드 페이지 구현`)
-- PR description: 구현 내용과 주요 결정 사항 간단히 기술
+- PR description: `.github/pull_request_template.md` 형식을 따름
 - main에 **Squash merge** 후 브랜치 삭제

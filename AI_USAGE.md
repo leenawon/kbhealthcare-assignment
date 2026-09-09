@@ -12,6 +12,8 @@
 | 프로젝트 초기 세팅 | 과제 요구사항 문서(requirement.md, openapi.yaml)를 제공하고 기술 스택 선택과 초기 세팅 요청 | 스택 선택 근거를 검토 후 채택, 패키지 설치 및 폴더 구조 구성에 활용 |
 | 기반 구조 구현 | OpenAPI 문서를 기반으로 TypeScript 타입, API 클라이언트, MSW 핸들러, 라우터, 인증 컨텍스트, 레이아웃 초안 요청 | 전체 구조 검토 후 채택, tsc --noEmit으로 타입 오류 없음 확인 |
 | 로그인 페이지 및 Modal 컴포넌트 구현 | 과제 요구사항(폼 검증 조건, 에러 모달, 원래 경로 복귀)을 제공하고 구현 요청 | 구현 결과 검토 후 버그 2건 발견 및 수정 요청, 직접 브라우저에서 시나리오 확인 |
+| GitHub Actions CI 및 PR 템플릿 구성 | PR마다 타입 체크·린트·빌드 오류를 자동으로 검출하는 CI 요청, PR 템플릿 통일성 필요 언급 | CI 워크플로우 및 PR 템플릿 파일 생성 후 직접 확인. CI 오류(pnpm 버전 충돌, 타입 오류) 3건 발생 → 원인 파악 후 수정 요청 |
+| 대시보드 페이지 구현 | API 계약(numOfTask, numOfRestTask, numOfDoneTask) 기반으로 구현 요청 | 결과 검토 후 카드 문구 일부 직접 수정 ("완료한 할 일" → "완료한 일") |
 
 ## 주요 판단
 
@@ -36,6 +38,9 @@
 | accessToken을 localStorage에 저장 | XSS 공격으로 탈취 가능, OpenAPI 스펙도 refreshToken을 쿠키로 처리하도록 설계되어 있어 보안 설계와 불일치 | accessToken은 React state(메모리)로 변경, refreshToken은 document.cookie로 시뮬레이션 |
 | 로그인 성공 후 navigate(from) 직접 호출 | auth 상태 업데이트(setAccessToken)와 router 이동(navigate)이 동시에 일어나 race condition 발생. ProtectedRoute가 isAuthenticated가 아직 false인 상태에서 재실행되어 /sign-in으로 다시 튕기고 원래 경로가 소실됨 | auth.signIn() 후 isAuthenticated guard가 from으로 이동하도록 변경. 직접 브라우저에서 /user 접근 → 로그인 → /user 복귀 시나리오 확인 |
 | 계정 메뉴(로그인/회원정보)를 콘텐츠 메뉴와 동일선상에 나열 | 일반적인 사이드바 UX에서 계정 관련 항목은 콘텐츠 nav와 성격이 달라 동등하게 나열하면 어색함 | 사이드바 하단에 분리 배치하도록 수정 요청 |
+| PR 템플릿을 CLAUDE.md에 작성 | CLAUDE.md는 AI 참조용 문서이며 PR 템플릿은 `.github/pull_request_template.md`가 GitHub 표준 (UI에서 PR 생성 시 자동 적용) | `.github/pull_request_template.md` 생성, CLAUDE.md에는 참조만 남기도록 수정 요청 |
+| CI에서 pnpm `version: latest` 사용 | 로컬 pnpm v10과 CI pnpm v12의 빌드 스크립트 정책 차이로 `ERR_PNPM_IGNORED_BUILDS` 발생 후 `version` 중복 지정으로 `ERR_PNPM_BAD_PM_VERSION`까지 연속 오류 | CI 오류 로그를 제공하고 수정 요청. `package.json`에 `packageManager: "pnpm@10.30.3"` 추가, CI `version` 필드 제거로 해결 |
+| `ApiError`에 parameter property 문법 사용 | `erasableSyntaxOnly: true` 설정에서 허용되지 않는 문법. 로컬은 `.tsbuildinfo` 캐시로 통과했으나 캐시 없는 CI에서 TS1294 오류 발생 | CI 오류 로그를 제공하고 수정 요청. 명시적 프로퍼티 선언으로 변경 |
 
 ## 검증
 

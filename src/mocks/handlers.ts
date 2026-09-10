@@ -1,14 +1,14 @@
 import { http, HttpResponse } from 'msw';
 import type { TaskItem } from '../types/api';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 const MOCK_USER = {
   name: '이나원',
   memo: 'KB헬스케어 프론트엔드 지원자입니다.',
 };
 
-let mockTasks: TaskItem[] = Array.from({ length: 12 }, (_, i) => ({
+let mockTasks: TaskItem[] = Array.from({ length: 25 }, (_, i) => ({
   id: `task-${i + 1}`,
   title: `할 일 ${i + 1}`,
   memo: `할 일 ${i + 1}에 대한 메모입니다.`,

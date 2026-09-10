@@ -15,6 +15,7 @@
 | GitHub Actions CI 및 PR 템플릿 구성 | PR마다 타입 체크·린트·빌드 오류를 자동으로 검출하는 CI 요청, PR 템플릿 통일성 필요 언급 | CI 워크플로우 및 PR 템플릿 파일 생성 후 직접 확인. CI 오류(pnpm 버전 충돌, 타입 오류) 3건 발생 → 원인 파악 후 수정 요청 |
 | 대시보드 페이지 구현 | API 계약(numOfTask, numOfRestTask, numOfDoneTask) 기반으로 구현 요청 | 결과 검토 후 카드 문구 일부 직접 수정 ("완료한 할 일" → "완료한 일") |
 | 할일 목록·상세 페이지 구현 | 페이지네이션(URL page param), 카드 목록, 404 빈 상태 화면, 삭제 확인 모달(ID 입력 일치 시 활성화) 구현 요청 | 코드 품질 직접 검토: 인라인 스타일·핸들러 추출, 중첩 삼항 제거, 공통 CSS 분리, 반복 JSX 배열화 등 여러 수정 요청. 버그 4건 직접 발견 및 수정 요청 |
+| 할일 목록·상세 추가 버그 수정 및 UX 개선 | 새로고침 시 401 오류, 전체 페이지 스크롤, 페이지네이션 하단 고정, 화면 깜빡임 현상 직접 발견 후 원인 파악 및 수정 요청 | 각 버그의 원인(race condition, height 기준값, ProtectedRoute null 반환)을 질문하고 근거를 확인한 뒤 수정 적용 |
 
 ## 주요 판단
 
@@ -42,6 +43,10 @@
 | PR 템플릿을 CLAUDE.md에 작성 | CLAUDE.md는 AI 참조용 문서이며 PR 템플릿은 `.github/pull_request_template.md`가 GitHub 표준 (UI에서 PR 생성 시 자동 적용) | `.github/pull_request_template.md` 생성, CLAUDE.md에는 참조만 남기도록 수정 요청 |
 | MSW refresh 핸들러에 `isLoggedIn` 모듈 변수 사용 | MSW v2는 Service Worker가 아닌 메인 스레드에서 실행되므로 모듈 변수는 페이지 새로고침 시 초기화됨. 쿠키는 유지되는데 변수는 사라져 세션 복구 실패 | `document.cookie`에 직접 접근하도록 변경. 메인 스레드에서는 `document` 접근 가능하며 쿠키는 새로고침 후에도 유지됨 |
 | 삭제 확인 모달 버튼을 children 내부에 직접 구현 | Modal 컴포넌트 footer에 이미 "확인" 버튼이 렌더링되므로 버튼 중복 발생 | Modal에 `footer?: React.ReactNode` prop 추가. 기본값은 "확인" 버튼, 삭제 모달은 취소/삭제 버튼으로 오버라이드 |
+| `retry: false` 전역 설정 | 네트워크 오류·5xx 서버 오류까지 재시도를 막아버려 복구 가능한 오류도 즉시 실패 처리됨 | 4xx 클라이언트 오류는 즉시 실패, 그 외는 3회 재시도하는 함수로 변경 |
+| `useEffect`로 `setAccessTokenGetter` 동기화 | React는 useEffect를 자식 컴포넌트 먼저 실행하므로, TanStack Query의 쿼리 발사(자식 useEffect)가 AuthProvider의 토큰 getter 업데이트(부모 useEffect)보다 먼저 실행되어 새로고침 시 401 발생 | `useLayoutEffect`로 변경. 레이아웃 이펙트는 모든 패시브 이펙트(useEffect)보다 먼저 실행되므로 race condition 해소 |
+| `ProtectedRoute`에서 인증 로딩 중 `return null` | 새로고침 시 인증 확인 동안 main 영역이 비어 흰 화면 깜빡임 발생 | CSS border-spin 스피너로 대체 |
+| Layout root에 `min-height: 100vh` 사용 | `min-height`는 flex 자식의 `height: 100%` 기준값이 되지 않아 TaskList의 flex 레이아웃(목록 스크롤, 페이지네이션 고정)이 동작하지 않음 | `height: 100vh`로 변경. 명시적 높이를 지정해야 자식이 `height: 100%`를 올바르게 참조함 |
 
 ## 검증
 
@@ -49,7 +54,7 @@
 - 직접 확인한 사용자 시나리오: `/user` 직접 접근 → `/sign-in` 리다이렉트 → 로그인 → `/user` 복귀 확인 / 비밀번호 24자 초과 입력 제한 확인
 - 명세와 대조한 내용: 로그인 폼 검증 조건(이메일 형식, 비밀번호 8~24자 영문+숫자) OpenAPI 및 requirement.md와 대조 확인
 - CI를 통해 발견 및 수정한 오류: pnpm v10/v12 빌드 스크립트 정책 차이(`ERR_PNPM_IGNORED_BUILDS`), `ApiError` parameter property 문법 오류(`erasableSyntaxOnly` 위반, TS1294) — 로컬 캐시로 통과했으나 CI 전체 검사에서 발견
-- 직접 발견 및 수정 요청한 버그: 삭제 모달 내 "확인" 버튼 중복 노출 / MSW 세션 새로고침 시 소실 / 존재하지 않는 ID 접근 시 404 화면 미표시 / 삭제 모달 버튼 gap 누락
+- 직접 발견 및 수정 요청한 버그: 삭제 모달 내 "확인" 버튼 중복 노출 / MSW 세션 새로고침 시 소실(isLoggedIn 변수 접근법 → document.cookie 직접 접근으로 재수정) / 존재하지 않는 ID 접근 시 404 화면 미표시 / 삭제 모달 버튼 gap 누락 / 새로고침 시 401 race condition / 전체 페이지 스크롤 및 페이지네이션 미고정 / 화면 깜빡임
 
 ## 남은 한계
 

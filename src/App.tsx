@@ -8,11 +8,18 @@ import { SignIn } from './pages/SignIn';
 import { TaskList } from './pages/TaskList';
 import { TaskDetail } from './pages/TaskDetail';
 import { User } from './pages/User';
+import { ApiError } from './api/client';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false,
+      retry: (failureCount, error) => {
+        // 4xx 클라이언트 오류는 재시도해도 의미 없으므로 즉시 실패 처리
+        if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
+          return false;
+        }
+        return failureCount < 3;
+      },
       staleTime: 1000 * 60,
     },
   },

@@ -40,9 +40,9 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/refresh', ({ request }) => {
-    const cookie = request.headers.get('cookie') ?? '';
-    if (!cookie.includes('token=')) {
+  http.post('/api/refresh', () => {
+    // MSW v2 핸들러는 메인 스레드에서 실행되므로 document.cookie에 직접 접근 가능
+    if (!document.cookie.includes('kb_refresh_token=')) {
       return HttpResponse.json({ errorMessage: '인증이 만료되었습니다.' }, { status: 401 });
     }
     return HttpResponse.json({

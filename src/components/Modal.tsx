@@ -6,9 +6,10 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
   if (!isOpen) return null;
 
   return createPortal(
@@ -17,9 +18,11 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         <h2 className={styles.title}>{title}</h2>
         <div className={styles.body}>{children}</div>
         <div className={styles.footer}>
-          <button className={styles.closeButton} onClick={onClose}>
-            확인
-          </button>
+          {footer ?? (
+            <button className={styles.closeButton} onClick={onClose}>
+              확인
+            </button>
+          )}
         </div>
       </div>
     </div>,

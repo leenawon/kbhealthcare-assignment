@@ -14,6 +14,7 @@
 | 로그인 페이지 및 Modal 컴포넌트 구현 | 과제 요구사항(폼 검증 조건, 에러 모달, 원래 경로 복귀)을 제공하고 구현 요청 | 구현 결과 검토 후 버그 2건 발견 및 수정 요청, 직접 브라우저에서 시나리오 확인 |
 | GitHub Actions CI 및 PR 템플릿 구성 | PR마다 타입 체크·린트·빌드 오류를 자동으로 검출하는 CI 요청, PR 템플릿 통일성 필요 언급 | CI 워크플로우 및 PR 템플릿 파일 생성 후 직접 확인. CI 오류(pnpm 버전 충돌, 타입 오류) 3건 발생 → 원인 파악 후 수정 요청 |
 | 대시보드 페이지 구현 | API 계약(numOfTask, numOfRestTask, numOfDoneTask) 기반으로 구현 요청 | 결과 검토 후 카드 문구 일부 직접 수정 ("완료한 할 일" → "완료한 일") |
+| 할일 목록·상세 페이지 구현 | 페이지네이션(URL page param), 카드 목록, 404 빈 상태 화면, 삭제 확인 모달(ID 입력 일치 시 활성화) 구현 요청 | 코드 품질 직접 검토: 인라인 스타일·핸들러 추출, 중첩 삼항 제거, 공통 CSS 분리, 반복 JSX 배열화 등 여러 수정 요청. 버그 4건 직접 발견 및 수정 요청 |
 
 ## 주요 판단
 
@@ -39,14 +40,16 @@
 | 로그인 성공 후 navigate(from) 직접 호출 | auth 상태 업데이트(setAccessToken)와 router 이동(navigate)이 동시에 일어나 race condition 발생. ProtectedRoute가 isAuthenticated가 아직 false인 상태에서 재실행되어 /sign-in으로 다시 튕기고 원래 경로가 소실됨 | auth.signIn() 후 isAuthenticated guard가 from으로 이동하도록 변경. 직접 브라우저에서 /user 접근 → 로그인 → /user 복귀 시나리오 확인 |
 | 계정 메뉴(로그인/회원정보)를 콘텐츠 메뉴와 동일선상에 나열 | 일반적인 사이드바 UX에서 계정 관련 항목은 콘텐츠 nav와 성격이 달라 동등하게 나열하면 어색함 | 사이드바 하단에 분리 배치하도록 수정 요청 |
 | PR 템플릿을 CLAUDE.md에 작성 | CLAUDE.md는 AI 참조용 문서이며 PR 템플릿은 `.github/pull_request_template.md`가 GitHub 표준 (UI에서 PR 생성 시 자동 적용) | `.github/pull_request_template.md` 생성, CLAUDE.md에는 참조만 남기도록 수정 요청 |
-| CI에서 pnpm `version: latest` 사용 | 로컬 pnpm v10과 CI pnpm v12의 빌드 스크립트 정책 차이로 `ERR_PNPM_IGNORED_BUILDS` 발생 후 `version` 중복 지정으로 `ERR_PNPM_BAD_PM_VERSION`까지 연속 오류 | CI 오류 로그를 제공하고 수정 요청. `package.json`에 `packageManager: "pnpm@10.30.3"` 추가, CI `version` 필드 제거로 해결 |
-| `ApiError`에 parameter property 문법 사용 | `erasableSyntaxOnly: true` 설정에서 허용되지 않는 문법. 로컬은 `.tsbuildinfo` 캐시로 통과했으나 캐시 없는 CI에서 TS1294 오류 발생 | CI 오류 로그를 제공하고 수정 요청. 명시적 프로퍼티 선언으로 변경 |
+| MSW refresh 핸들러에 `isLoggedIn` 모듈 변수 사용 | MSW v2는 Service Worker가 아닌 메인 스레드에서 실행되므로 모듈 변수는 페이지 새로고침 시 초기화됨. 쿠키는 유지되는데 변수는 사라져 세션 복구 실패 | `document.cookie`에 직접 접근하도록 변경. 메인 스레드에서는 `document` 접근 가능하며 쿠키는 새로고침 후에도 유지됨 |
+| 삭제 확인 모달 버튼을 children 내부에 직접 구현 | Modal 컴포넌트 footer에 이미 "확인" 버튼이 렌더링되므로 버튼 중복 발생 | Modal에 `footer?: React.ReactNode` prop 추가. 기본값은 "확인" 버튼, 삭제 모달은 취소/삭제 버튼으로 오버라이드 |
 
 ## 검증
 
 - 실행한 자동 검사: `pnpm tsc --noEmit` 으로 타입 오류 없음 확인 (각 작업 완료 시점마다 실행)
 - 직접 확인한 사용자 시나리오: `/user` 직접 접근 → `/sign-in` 리다이렉트 → 로그인 → `/user` 복귀 확인 / 비밀번호 24자 초과 입력 제한 확인
 - 명세와 대조한 내용: 로그인 폼 검증 조건(이메일 형식, 비밀번호 8~24자 영문+숫자) OpenAPI 및 requirement.md와 대조 확인
+- CI를 통해 발견 및 수정한 오류: pnpm v10/v12 빌드 스크립트 정책 차이(`ERR_PNPM_IGNORED_BUILDS`), `ApiError` parameter property 문법 오류(`erasableSyntaxOnly` 위반, TS1294) — 로컬 캐시로 통과했으나 CI 전체 검사에서 발견
+- 직접 발견 및 수정 요청한 버그: 삭제 모달 내 "확인" 버튼 중복 노출 / MSW 세션 새로고침 시 소실 / 존재하지 않는 ID 접근 시 404 화면 미표시 / 삭제 모달 버튼 gap 누락
 
 ## 남은 한계
 

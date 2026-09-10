@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { setAccessTokenGetter } from '../api/client';
 import { authApi } from '../api/auth';
 import type { AuthTokenResponse } from '../types/api';
@@ -33,8 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // API 클라이언트가 항상 최신 accessToken을 참조하도록 getter를 동기화합니다.
-  useEffect(() => {
+  // useLayoutEffect로 동기화해야 TanStack Query의 useEffect(쿼리 발사)보다
+  // 먼저 실행되어 accessToken race condition을 방지합니다.
+  useLayoutEffect(() => {
     setAccessTokenGetter(() => accessToken);
   }, [accessToken]);
 

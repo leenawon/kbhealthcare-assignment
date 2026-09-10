@@ -1,14 +1,14 @@
 import { http, HttpResponse } from 'msw';
 import type { TaskItem } from '../types/api';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 const MOCK_USER = {
   name: '이나원',
   memo: 'KB헬스케어 프론트엔드 지원자입니다.',
 };
 
-let mockTasks: TaskItem[] = Array.from({ length: 12 }, (_, i) => ({
+let mockTasks: TaskItem[] = Array.from({ length: 25 }, (_, i) => ({
   id: `task-${i + 1}`,
   title: `할 일 ${i + 1}`,
   memo: `할 일 ${i + 1}에 대한 메모입니다.`,
@@ -40,9 +40,9 @@ export const handlers = [
     });
   }),
 
-  http.post('/api/refresh', ({ request }) => {
-    const cookie = request.headers.get('cookie') ?? '';
-    if (!cookie.includes('token=')) {
+  http.post('/api/refresh', () => {
+    // MSW v2 핸들러는 메인 스레드에서 실행되므로 document.cookie에 직접 접근 가능
+    if (!document.cookie.includes('kb_refresh_token=')) {
       return HttpResponse.json({ errorMessage: '인증이 만료되었습니다.' }, { status: 401 });
     }
     return HttpResponse.json({

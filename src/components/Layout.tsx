@@ -1,10 +1,16 @@
-import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, CheckSquare, UserCircle, LogIn } from 'lucide-react';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, CheckSquare, UserCircle, LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Layout.module.css';
 
 export function Layout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    signOut();
+    navigate('/sign-in');
+  };
 
   return (
     <div className={styles.container}>
@@ -34,15 +40,21 @@ export function Layout() {
 
         <div className={styles.navBottom}>
           {isAuthenticated ? (
-            <NavLink
-              to="/user"
-              className={({ isActive }) =>
-                `${styles.navItem} ${isActive ? styles.active : ''}`
-              }
-            >
-              <UserCircle size={20} />
-              <span>회원정보</span>
-            </NavLink>
+            <>
+              <NavLink
+                to="/user"
+                className={({ isActive }) =>
+                  `${styles.navItem} ${isActive ? styles.active : ''}`
+                }
+              >
+                <UserCircle size={20} />
+                <span>회원정보</span>
+              </NavLink>
+              <button className={styles.navItem} onClick={handleLogout}>
+                <LogOut size={20} />
+                <span>로그아웃</span>
+              </button>
+            </>
           ) : (
             <NavLink
               to="/sign-in"

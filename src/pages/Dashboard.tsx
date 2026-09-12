@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { dashboardApi } from "../api/dashboard";
-import { usePageTitle } from "../hooks/usePageTitle";
-import pageStyles from "../styles/page.module.css";
-import styles from "./Dashboard.module.css";
+import { useQuery } from '@tanstack/react-query';
+import { dashboardApi } from '../api/dashboard';
+import { usePageTitle } from '../hooks/usePageTitle';
+import pageStyles from '../styles/page.module.css';
+import styles from './Dashboard.module.css';
 
 const STAT_CARDS = [
   { label: '전체 할 일', key: 'numOfTask' as const, done: false },

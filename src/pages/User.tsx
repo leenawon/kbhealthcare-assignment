@@ -10,6 +10,7 @@ export function User() {
   const { data, isPending, isError } = useQuery({
     queryKey: ['user'],
     queryFn: userApi.getUser,
+    staleTime: Infinity,
   });
 
   const renderContent = () => {

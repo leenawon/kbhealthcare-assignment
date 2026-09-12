@@ -5,6 +5,7 @@ import { taskApi } from '../api/task';
 import { ApiError } from '../api/client';
 import { usePageTitle } from '../hooks/usePageTitle';
 import { Modal } from '../components/Modal';
+import pageStyles from '../styles/page.module.css';
 import styles from './TaskDetail.module.css';
 
 export function TaskDetail() {
@@ -23,6 +24,7 @@ export function TaskDetail() {
     mutationFn: () => taskApi.deleteTask(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       navigate('/task');
     },
   });
@@ -58,6 +60,14 @@ export function TaskDetail() {
           <p className={styles.emptyDescription}>삭제되었거나 잘못된 경로입니다.</p>
           <Link to="/task" className={styles.backButton}>목록으로 돌아가기</Link>
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={styles.container}>
+        <p className={pageStyles.errorText}>데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>
       </div>
     );
   }

@@ -57,6 +57,8 @@
 | 모달 오픈 시 배경 스크롤 미잠금 | 모달이 열린 상태에서 뒤 페이지가 스크롤되는 UX 문제 | `document.body.style.overflow = 'hidden'` 처리 후 닫힐 때 복원 |
 | `onClose`를 `useEffect` 의존성 배열에 포함 | 부모에서 인라인 함수로 전달 시 렌더마다 참조가 바뀌어 keydown 리스너가 불필요하게 재등록됨 | `useRef`로 항상 최신 `onClose`를 참조하도록 변경, deps에서 제거 |
 | `QueryClient`에 `staleTime: 1000 * 60` 전역 설정 | 데이터 성격과 무관하게 모든 쿼리에 동일한 캐시 전략 적용 | 전역 설정 제거. 앱 내 수정 기능이 없는 `['user']` 쿼리에만 `staleTime: Infinity` 설정 |
+| catch-all 라우트 미구현 | 존재하지 않는 경로 접근 시 사이드바만 보이고 본문이 빈 화면 렌더링 | `path="*"`에 `<Navigate to="/" replace />` 추가 |
+| 에러·빈 상태에서도 페이지네이션 표시 | 에러 메시지 아래 비활성화된 이전/다음 버튼이 불필요하게 렌더링됨 | `data && data.data.length > 0` 조건으로 페이지네이션 조건부 렌더링 |
 
 ## 검증
 

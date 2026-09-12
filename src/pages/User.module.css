@@ -30,7 +30,7 @@
 }
 
 .fieldValue {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-md);
   color: var(--color-text-primary);
 }
 

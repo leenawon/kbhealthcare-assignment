@@ -1,14 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { taskApi } from '../api/task';
+import { usePageTitle } from '../hooks/usePageTitle';
+import pageStyles from '../styles/page.module.css';
 import styles from './TaskList.module.css';
 
 export function TaskList() {
+  usePageTitle('할 일');
+
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
   const navigate = useNavigate();
 
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError } = useQuery({
     queryKey: ['tasks', page],
     queryFn: () => taskApi.getTasks(page),
   });
@@ -28,6 +32,10 @@ export function TaskList() {
           ))}
         </div>
       );
+    }
+
+    if (isError) {
+      return <p className={pageStyles.errorText}>데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>;
     }
 
     if (data?.data.length === 0) {

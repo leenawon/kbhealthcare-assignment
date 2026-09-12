@@ -6,6 +6,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useAuth } from '../hooks/useAuth';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Modal } from '../components/Modal';
 import styles from './SignIn.module.css';
 
@@ -40,6 +41,8 @@ export function SignIn() {
     mode: 'onChange',
   });
 
+  usePageTitle('로그인');
+
   if (auth.isAuthenticated) {
     return <Navigate to={from} replace />;
   }
@@ -72,10 +75,11 @@ export function SignIn() {
               type="email"
               className={`${styles.input} ${touchedFields.email && errors.email ? styles.inputError : ''}`}
               placeholder="이메일을 입력하세요"
+              aria-describedby={touchedFields.email && errors.email ? 'email-error' : undefined}
               {...register('email')}
             />
             {touchedFields.email && errors.email && (
-              <span className={styles.errorMessage} role="alert">
+              <span id="email-error" className={styles.errorMessage} role="alert">
                 {errors.email.message}
               </span>
             )}
@@ -91,10 +95,11 @@ export function SignIn() {
               maxLength={24}
               className={`${styles.input} ${dirtyFields.password && errors.password ? styles.inputError : ''}`}
               placeholder="비밀번호를 입력하세요"
+              aria-describedby={dirtyFields.password && errors.password ? 'password-error' : undefined}
               {...register('password')}
             />
             {dirtyFields.password && errors.password && (
-              <span className={styles.errorMessage} role="alert">
+              <span id="password-error" className={styles.errorMessage} role="alert">
                 {errors.password.message}
               </span>
             )}

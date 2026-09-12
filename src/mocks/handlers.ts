@@ -8,6 +8,7 @@ const MOCK_USER = {
   memo: 'KB헬스케어 프론트엔드 지원자입니다.',
 };
 
+// 인메모리 저장소: 실제 API에서는 서버 DB가 관리하므로 새로고침 시 초기화되지 않습니다.
 let mockTasks: TaskItem[] = Array.from({ length: 25 }, (_, i) => ({
   id: `task-${i + 1}`,
   title: `할 일 ${i + 1}`,
@@ -27,6 +28,7 @@ export const handlers = [
   http.post('/api/sign-in', async ({ request }) => {
     const body = await request.json() as { email: string; password: string };
 
+    // mock 환경에서는 자격증명을 검증하지 않습니다. 실제 API에서는 서버가 검증합니다.
     if (!body.email || !body.password) {
       return HttpResponse.json(
         { errorMessage: '이메일과 비밀번호를 입력해주세요.' },

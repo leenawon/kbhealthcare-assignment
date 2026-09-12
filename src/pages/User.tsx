@@ -1,9 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { userApi } from '../api/user';
+import { usePageTitle } from '../hooks/usePageTitle';
+import pageStyles from '../styles/page.module.css';
 import styles from './User.module.css';
 
 export function User() {
-  const { data, isPending } = useQuery({
+  usePageTitle('회원정보');
+
+  const { data, isPending, isError } = useQuery({
     queryKey: ['user'],
     queryFn: userApi.getUser,
   });
@@ -22,6 +26,10 @@ export function User() {
           </div>
         </div>
       );
+    }
+
+    if (isError) {
+      return <p className={pageStyles.errorText}>데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>;
     }
 
     return (

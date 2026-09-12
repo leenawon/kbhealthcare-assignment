@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { taskApi } from '../api/task';
 import { ApiError } from '../api/client';
+import { usePageTitle } from '../hooks/usePageTitle';
 import { Modal } from '../components/Modal';
 import styles from './TaskDetail.module.css';
 
@@ -25,6 +26,8 @@ export function TaskDetail() {
       navigate('/task');
     },
   });
+
+  usePageTitle('할 일 상세');
 
   const handleCloseModal = () => {
     setIsModalOpen(false);

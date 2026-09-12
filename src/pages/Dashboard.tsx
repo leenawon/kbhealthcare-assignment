@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { dashboardApi } from "../api/dashboard";
+import { usePageTitle } from "../hooks/usePageTitle";
+import pageStyles from "../styles/page.module.css";
 import styles from "./Dashboard.module.css";
 
 const STAT_CARDS = [
@@ -9,7 +11,9 @@ const STAT_CARDS = [
 ];
 
 export function Dashboard() {
-  const { data, isPending } = useQuery({
+  usePageTitle('대시보드');
+
+  const { data, isPending, isError } = useQuery({
     queryKey: ["dashboard"],
     queryFn: dashboardApi.getDashboard,
   });
@@ -18,20 +22,24 @@ export function Dashboard() {
     <div className={styles.container}>
       <h1 className={styles.heading}>대시보드</h1>
 
-      <div className={styles.cards}>
-        {STAT_CARDS.map(({ label, key, done }) => (
-          <div key={key} className={styles.card}>
-            <span className={styles.cardLabel}>{label}</span>
-            {isPending ? (
-              <span className={`${styles.skeleton} ${styles.skeletonValue}`} />
-            ) : (
-              <span className={`${styles.cardValue} ${done ? styles.done : ''}`}>
-                {data?.[key] ?? 0}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
+      {isError ? (
+        <p className={pageStyles.errorText}>데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</p>
+      ) : (
+        <div className={styles.cards}>
+          {STAT_CARDS.map(({ label, key, done }) => (
+            <div key={key} className={styles.card}>
+              <span className={styles.cardLabel}>{label}</span>
+              {isPending ? (
+                <span className={`${styles.skeleton} ${styles.skeletonValue}`} />
+              ) : (
+                <span className={`${styles.cardValue} ${done ? styles.done : ''}`}>
+                  {data?.[key] ?? 0}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { taskApi } from '../api/task';
 import { usePageTitle } from '../hooks/usePageTitle';
 import pageStyles from '../styles/page.module.css';
@@ -10,7 +10,6 @@ export function TaskList() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Number(searchParams.get('page') ?? '1');
-  const navigate = useNavigate();
 
   const { data, isPending, isError } = useQuery({
     queryKey: ['tasks', page],
@@ -45,17 +44,14 @@ export function TaskList() {
     return (
       <div className={styles.list}>
         {data?.data.map((task) => (
-          <div
+          <Link
             key={task.id}
+            to={`/task/${task.id}`}
             className={styles.card}
-            onClick={() => navigate(`/task/${task.id}`)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && navigate(`/task/${task.id}`)}
           >
             <span className={styles.cardTitle}>{task.title}</span>
             <span className={styles.cardMemo}>{task.memo}</span>
-          </div>
+          </Link>
         ))}
       </div>
     );

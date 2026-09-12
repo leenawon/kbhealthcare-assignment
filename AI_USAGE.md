@@ -17,6 +17,8 @@
 | 할일 목록·상세 페이지 구현 | 페이지네이션(URL page param), 카드 목록, 404 빈 상태 화면, 삭제 확인 모달(ID 입력 일치 시 활성화) 구현 요청 | 코드 품질 직접 검토: 인라인 스타일·핸들러 추출, 중첩 삼항 제거, 공통 CSS 분리, 반복 JSX 배열화 등 여러 수정 요청. 버그 4건 직접 발견 및 수정 요청 |
 | 할일 목록·상세 추가 버그 수정 및 UX 개선 | 새로고침 시 401 오류, 전체 페이지 스크롤, 페이지네이션 하단 고정, 화면 깜빡임 현상 직접 발견 후 원인 파악 및 수정 요청 | 각 버그의 원인(race condition, height 기준값, ProtectedRoute null 반환)을 질문하고 근거를 확인한 뒤 수정 적용 |
 | 회원정보 페이지 구현 | 요구사항 문서를 직접 확인하고 `GET /api/user` 결과(name, memo) 표시 및 로그아웃 기능 구현 요청 | 로그아웃 버튼 위치(회원정보 페이지 vs 사이드바)를 직접 판단하여 사이드바로 변경 요청. 대시보드 카드 라벨이 요구사항과 다른 것을 직접 발견, 현재 라벨이 UX상 더 명확하다고 판단하여 README에 기록하기로 결정 |
+| 접근성 및 UX 개선 | 모달 WAI-ARIA 속성, 각 페이지 에러 상태 처리, 로그인 폼 aria-describedby, document.title 관리 구현 요청 | useRef 패턴을 통한 stale closure 해결 방식과 aria- 속성의 적절성을 직접 확인 후 채택 |
+| 코드 품질 최종 점검 | 코드 전반 검토 및 개선 요청 | 비404 에러 미처리, TaskList 시멘틱 HTML, Modal 배경 스크롤 잠금 등 각 항목의 근거와 수정 방향을 확인한 뒤 적용. staleTime 전략을 전역 설정에서 쿼리별 설정으로 개선 요청 |
 
 ## 주요 판단
 
@@ -50,6 +52,11 @@
 | `useEffect`로 `setAccessTokenGetter` 동기화 | React는 useEffect를 자식 컴포넌트 먼저 실행하므로, TanStack Query의 쿼리 발사(자식 useEffect)가 AuthProvider의 토큰 getter 업데이트(부모 useEffect)보다 먼저 실행되어 새로고침 시 401 발생 | `useLayoutEffect`로 변경. 레이아웃 이펙트는 모든 패시브 이펙트(useEffect)보다 먼저 실행되므로 race condition 해소 |
 | `ProtectedRoute`에서 인증 로딩 중 `return null` | 새로고침 시 인증 확인 동안 main 영역이 비어 흰 화면 깜빡임 발생 | CSS border-spin 스피너로 대체 |
 | Layout root에 `min-height: 100vh` 사용 | `min-height`는 flex 자식의 `height: 100%` 기준값이 되지 않아 TaskList의 flex 레이아웃(목록 스크롤, 페이지네이션 고정)이 동작하지 않음 | `height: 100vh`로 변경. 명시적 높이를 지정해야 자식이 `height: 100%`를 올바르게 참조함 |
+| `TaskDetail`에서 404만 처리 | 비404 에러 시 빈 데이터로 정상 레이아웃이 렌더링됨 | guard clause 패턴으로 404와 일반 에러를 각각 처리하도록 수정 |
+| `TaskList` 카드를 `div[role="button"]`으로 구현 | 카드는 페이지 이동이 목적이므로 `role="button"` 대신 `<Link>`가 시멘틱에 맞음. 스크린리더가 "버튼"으로 잘못 읽음 | `<Link>`로 교체, CSS에 링크 기본 스타일 리셋 추가 |
+| 모달 오픈 시 배경 스크롤 미잠금 | 모달이 열린 상태에서 뒤 페이지가 스크롤되는 UX 문제 | `document.body.style.overflow = 'hidden'` 처리 후 닫힐 때 복원 |
+| `onClose`를 `useEffect` 의존성 배열에 포함 | 부모에서 인라인 함수로 전달 시 렌더마다 참조가 바뀌어 keydown 리스너가 불필요하게 재등록됨 | `useRef`로 항상 최신 `onClose`를 참조하도록 변경, deps에서 제거 |
+| `QueryClient`에 `staleTime: 1000 * 60` 전역 설정 | 데이터 성격과 무관하게 모든 쿼리에 동일한 캐시 전략 적용 | 전역 설정 제거. 앱 내 수정 기능이 없는 `['user']` 쿼리에만 `staleTime: Infinity` 설정 |
 
 ## 검증
 

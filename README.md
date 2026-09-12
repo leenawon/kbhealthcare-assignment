@@ -18,7 +18,7 @@ src/
 ├── api/            # 엔드포인트별 API 함수 (auth, dashboard, task, user)
 │   └── client.ts   # 공통 fetch 래퍼 (Bearer 토큰 주입, ApiError)
 ├── components/     # 공통 컴포넌트 (Layout, Modal)
-├── hooks/          # useAuth (인증 Context + 세션 복구 로직)
+├── hooks/          # useAuth (인증 Context + 세션 복구 로직), usePageTitle (페이지 title 관리)
 ├── mocks/          # MSW 핸들러 (handlers.ts)
 ├── pages/          # 페이지 컴포넌트 (Dashboard, SignIn, TaskList, TaskDetail, User)
 ├── router/         # ProtectedRoute (비로그인 접근 차단 + 원래 경로 복귀)
@@ -32,7 +32,7 @@ src/
 | :--- | :-------- |
 | Vite + React 19 | 인증 기반 클라이언트 SPA로 SSR 이점 없음. Next.js보다 단순한 구조가 과제 규모에 적합 |
 | TanStack Query | API 레이어를 `api/*.ts`에 분리하고 queryFn만 교체하면 실제 API로 전환 가능 |
-| MSW | 브라우저 레벨에서 네트워크를 intercept하므로 실제 API 교체 시 `src/mocks/handlers.ts`만 제거하면 됨 |
+| MSW | 브라우저 레벨에서 네트워크를 intercept하므로 실제 API 교체 시 `src/mocks/` 폴더 제거와 최소한의 설정 변경만으로 전환 가능 |
 | CSS Modules + CSS 변수 | 과제 조건인 "색상을 CSS 변수로 관리"를 `src/styles/tokens.css`에서 명시적으로 충족 |
 | React Hook Form + Zod | 이메일·비밀번호 유효성 조건을 선언적으로 처리, 제출 버튼 활성화 조건을 `isValid`로 간결하게 표현 |
 | accessToken: 메모리 저장 | XSS로 탈취 불가능한 가장 안전한 저장 방식. 새로고침 시 refreshToken 쿠키로 자동 복구 |

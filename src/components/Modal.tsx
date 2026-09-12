@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 
+const FOCUSABLE_SELECTOR = 'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])';
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -12,20 +14,24 @@ interface ModalProps {
 
 export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!isOpen) return;
 
+    document.body.style.overflow = 'hidden';
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
 
       if (e.key === 'Tab') {
-        const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
-        );
+        const focusable = modalRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
         if (!focusable || focusable.length === 0) return;
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -40,14 +46,15 @@ export function Modal({ isOpen, onClose, title, children, footer }: ModalProps) 
       }
     };
 
-    const focusable = modalRef.current?.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), input, [tabindex]:not([tabindex="-1"])',
-    );
+    const focusable = modalRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
     focusable?.[0]?.focus();
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

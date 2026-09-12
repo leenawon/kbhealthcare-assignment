@@ -63,23 +63,25 @@ export function TaskList() {
 
       {renderList()}
 
-      <div className={styles.pagination}>
-        <button
-          className={styles.pageButton}
-          onClick={() => goToPage(page - 1)}
-          disabled={page <= 1}
-        >
-          이전
-        </button>
-        <span className={styles.pageInfo}>{page} 페이지</span>
-        <button
-          className={styles.pageButton}
-          onClick={() => goToPage(page + 1)}
-          disabled={!data?.hasNext}
-        >
-          다음
-        </button>
-      </div>
+      {data && data.data.length > 0 && (
+        <div className={styles.pagination}>
+          <button
+            className={styles.pageButton}
+            onClick={() => goToPage(page - 1)}
+            disabled={page <= 1}
+          >
+            이전
+          </button>
+          <span className={styles.pageInfo}>{page} 페이지</span>
+          <button
+            className={styles.pageButton}
+            onClick={() => goToPage(page + 1)}
+            disabled={!data.hasNext}
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }
